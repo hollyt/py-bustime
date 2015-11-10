@@ -12,7 +12,7 @@ class stopInfo:
 		self.api_key = api_key
 		self.bus_line = 'MTA NYCT_{}'.format(bus_line)
 		self.stop_id = stop_id
-		self.requests = self.create_request()
+		self.busstop_data = self.create_request()
 
 	def create_request(self):
 		request = {
@@ -23,6 +23,12 @@ class stopInfo:
 			'DirectionRef': None,
 			'MaximumStopVisits': 4
 		}
-		response = requests.get(STOP_URL, params=request)
-		return response
+                try:
+		    busstop_data = requests.get(STOP_URL, params=request).json()
+                except Exception:
+                    print('Error making HTTP request.')
+                    exit(1)
+                return busstop_data
 
+        def parse_data(self):
+           pass 
