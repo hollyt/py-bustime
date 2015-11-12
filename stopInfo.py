@@ -13,6 +13,7 @@ class stopInfo:
         self.bus_line = 'MTA NYCT_{}'.format(bus_line)
         self.stop_id = stop_id
         self.busstop_data = self.create_request()
+        self.parsed_data = self.parse_request()
 
     def create_request(self):
         request = {
@@ -32,7 +33,27 @@ class stopInfo:
 
     # A LOT of extra info gets sent in the response. For now I'm only keeping
     # what I want to display.
-    def parse_data(self):
+    def parse_request(self):
         unpack_JSON = self.busstop_data['Siri']['ServiceDelivery']['StopMonitoringDelivery'][0]['MonitoredStopVisit']
-        approaching_busses = [bus for bus in unpack_JSON]
+        approaching_busses = [Bus(bus) for bus in unpack_JSON]
         return approaching_busses
+
+    def print_data(self):
+        for bus in self.parsed_data:
+            print(bus.format_data())
+
+class Bus:
+    def __init__(self,info):
+        # TODO: parse the arrival time
+        journey = info['MonitoredVehicleJourney']
+        monitoredCall = journey['MonitoredCall']
+
+        self.arrival_time = monitoredCall['ExpectedArrivalTime']
+        self.line = journey['PublishedLineName']
+        self.route = journey['DestinationName']
+        distances = monitoredCall['Extensions']['Distances']
+        self.stops_away = distances['StopsFromCall']
+
+    def format_data(self):
+        return '{}[[{}]]: {} STOPS AWAY'.format(self.line,self.route,self.stops_away)
+
