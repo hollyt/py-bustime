@@ -2,10 +2,19 @@
 
 import json
 import requests
+from datetime import datetime, timezone, timedelta
 
 # A python library for tracking MTA buses
 
 STOP_URL = 'http://bustime.mta.info/api/siri/stop-monitoring.json'
+
+def parse_time(s):
+    date = s[0:10].split('-')
+    time = s[11:19].split(':') # not interested in milliseconds
+    tz = s[23:].split(':')
+    return datetime(int(date[0]), int(date[1]), int(date[2]),
+            hour=int(time[0]), minute=int(time[1]), second=int(time[2]),
+            tzinfo=timezone(timedelta(hours=int(tz[0]),minutes=int(tz[1]))))
 
 class stopInfo:
     def __init__(self, api_key, bus_line, stop_id):
@@ -48,7 +57,7 @@ class Bus:
         journey = info['MonitoredVehicleJourney']
         monitoredCall = journey['MonitoredCall']
 
-        self.arrival_time = monitoredCall['ExpectedArrivalTime']
+        self.arrival_time = parse_time(monitoredCall['ExpectedArrivalTime'])
         self.line = journey['PublishedLineName']
         self.route = journey['DestinationName']
         distances = monitoredCall['Extensions']['Distances']
