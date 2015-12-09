@@ -58,18 +58,20 @@ class stopInfo:
         if self.outdated():
             self.update()
         for bus in self.buses:
-            print(bus.format_data())
+            bus.print_dt(datetime.now(tz=self.local_tz)+self.clock_skew)
 
 class Bus:
     def __init__(self,info):
         journey = info['MonitoredVehicleJourney']
         monitoredCall = journey['MonitoredCall']
-
         self.arrival_time = parse_datetime(monitoredCall['ExpectedArrivalTime'])
         self.line = journey['PublishedLineName']
         self.route = journey['DestinationName']
         distances = monitoredCall['Extensions']['Distances']
         self.stops_away = distances['StopsFromCall']
+
+    def print_dt(self, now):
+        print('{}[{}]: {}'.format(self.line,self.route,self.arrival_time-now))
 
     def format_data(self):
         return '{}[[{}]]: {} STOPS AWAY'.format(self.line,self.route,self.stops_away)
