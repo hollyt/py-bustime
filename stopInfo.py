@@ -55,7 +55,6 @@ class stopInfo:
         self.buses = [Bus(bus) for bus in stopvisits]
 
     def print_data(self):
-        time.sleep(59)
         if self.outdated():
             self.update()
         for bus in self.buses:
