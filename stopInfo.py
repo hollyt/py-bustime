@@ -64,14 +64,20 @@ class Bus:
     def __init__(self,info):
         journey = info['MonitoredVehicleJourney']
         monitoredCall = journey['MonitoredCall']
-        self.arrival_time = parse_datetime(monitoredCall['ExpectedArrivalTime'])
+        try:
+            self.arrival_time = parse_datetime(monitoredCall['ExpectedArrivalTime'])
+        except KeyError:
+            self.arrival_time = None
         self.line = journey['PublishedLineName']
         self.route = journey['DestinationName']
         distances = monitoredCall['Extensions']['Distances']
         self.stops_away = distances['StopsFromCall']
 
     def print_dt(self, now):
-        print('{}[{}]: {}'.format(self.line,self.route,self.arrival_time-now))
+        try:
+            print('{}[{}]: {}'.format(self.line,self.route,self.arrival_time-now))
+        except TypeError:
+            pass
 
     def format_data(self):
         return '{}[[{}]]: {} STOPS AWAY'.format(self.line,self.route,self.stops_away)
