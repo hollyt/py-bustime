@@ -1,10 +1,10 @@
 # py-bustime
-Python script+library for MTA bustime api so I can catch my bus from the command line!
+Python script & library for the MTA bustime api so you can catch your bus from the command line!
 
 # dependencies:
-    * python3
-    * requests module
-    * [bustime developer API key](http://bustime.mta.info/wiki/Developers/Index)
++ `python3`
++ `requests module`
++ `[bustime developer API key](http://bustime.mta.info/wiki/Developers/Index)`
 
 # usage ideas:
 
