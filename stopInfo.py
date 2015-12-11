@@ -54,11 +54,12 @@ class stopInfo:
         stopvisits = hugedump['Siri']['ServiceDelivery']['StopMonitoringDelivery'][0]['MonitoredStopVisit']
         self.buses = [Bus(bus) for bus in stopvisits]
 
-    def print_data(self):
+    def printf(self, fmt):
         if self.outdated():
             self.update()
         for bus in self.buses:
-            bus.print_dt(datetime.now(tz=self.local_tz)+self.clock_skew)
+            now = datetime.now(tz=self.local_tz)+self.clock_skew
+            print(bus.printf(fmt,now))
 
 class Bus:
     def __init__(self,info):
@@ -73,12 +74,19 @@ class Bus:
         distances = monitoredCall['Extensions']['Distances']
         self.stops_away = distances['StopsFromCall']
 
-    def print_dt(self, now):
-        try:
-            print('{}[{}]: {}'.format(self.line,self.route,self.arrival_time-now))
-        except TypeError:
-            pass
-
-    def format_data(self):
-        return '{}[[{}]]: {} STOPS AWAY'.format(self.line,self.route,self.stops_away)
-
+    def printf(self, fmt, now=None):
+        time_till = self.arrival_time-now if now is not None else None
+        time_till = time_till - timedelta(microseconds=time_till.microseconds) if now is not None else None # truncate microseconds for printing
+        hours_till = str(time_till.seconds//3600).zfill(2) if now is not None else None
+        minutes_till = str((time_till.seconds//60)%60).zfill(2) if now is not None else None
+        seconds_till = str(time_till.seconds%60).zfill(2) if now is not None else None
+        fmt_table = {'%l': self.line,
+                     '%r': self.route,
+                     '%s': self.stops_away,
+                     '%H': hours_till,
+                     '%M': minutes_till,
+                     '%S': seconds_till,
+                     '%T': str(time_till)}
+        for key in fmt_table:
+            fmt = fmt.replace(key,str(fmt_table[key]))
+        return fmt
