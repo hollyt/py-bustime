@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
+from datetime import datetime, timedelta, timezone
 import json
 import requests
-from datetime import datetime, timezone, timedelta
 import time
 
 # A python library for tracking MTA buses
@@ -27,11 +27,6 @@ class stopInfo:
         self.local_tz = timezone(timedelta(hours=-5))
         self.update()
 
-    def outdated(self):
-        rightnow = datetime.now(tz=self.local_tz)
-        return (self.response_time == None or
-            self.valid_till <= rightnow+self.clock_skew)
-
     def update(self):
         request = {
             'key': self.api_key,
@@ -42,23 +37,28 @@ class stopInfo:
             'MaximumStopVisits': 4
         }
         try:
-            hugedump = requests.get(STOP_URL, params=request).json()
+            response = requests.get(STOP_URL, params=request).json()
             response_time_local = datetime.now(tz=self.local_tz)
         except:
             print('Error making HTTP request.')
             exit(1)
-        stopmon = hugedump['Siri']['ServiceDelivery']['StopMonitoringDelivery'][0]
-        self.response_time = parse_datetime(stopmon['ResponseTimestamp'])
-        self.valid_till = parse_datetime(stopmon['ValidUntil'])
+        stop_time = response['Siri']['ServiceDelivery']['StopMonitoringDelivery'][0]
+        self.response_time = parse_datetime(stop_time['ResponseTimestamp'])
+        self.valid_till = parse_datetime(stop_time['ValidUntil'])
         self.clock_skew = self.response_time - response_time_local
-        stopvisits = hugedump['Siri']['ServiceDelivery']['StopMonitoringDelivery'][0]['MonitoredStopVisit']
+        stopvisits = response['Siri']['ServiceDelivery']['StopMonitoringDelivery'][0]['MonitoredStopVisit']
         self.buses = [Bus(bus) for bus in stopvisits]
+
+    def outdated(self):
+        rightnow = datetime.now(tz=self.local_tz)
+        return (self.response_time == None or
+            self.valid_till <= rightnow+self.clock_skew)
 
     def print_data(self):
         if self.outdated():
             self.update()
         for bus in self.buses:
-            bus.print_dt(datetime.now(tz=self.local_tz)+self.clock_skew)
+            bus.print_dt(datetime.now(tz=self.local_tz) + self.clock_skew)
 
 class Bus:
     def __init__(self,info):
