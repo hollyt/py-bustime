@@ -18,10 +18,11 @@ def parse_datetime(s):
             tzinfo=timezone(timedelta(hours=int(tz[0]),minutes=int(tz[1]))))
 
 class stopInfo:
-    def __init__(self, api_key, bus_line, stop_id):
+    def __init__(self, api_key, bus_line, stop_id, direction):
         self.api_key = api_key
         self.bus_line = 'MTA NYCT_{}'.format(bus_line)
         self.stop_id = stop_id
+        self.direction = direction
         self.last_updated = None
         # TODO: remove hardcoded timezone
         self.local_tz = timezone(timedelta(hours=-5))
