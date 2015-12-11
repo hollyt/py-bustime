@@ -17,7 +17,7 @@ def parse_datetime(s):
             hour=int(time[0]), minute=int(time[1]), second=int(time[2]),
             tzinfo=timezone(timedelta(hours=int(tz[0]),minutes=int(tz[1]))))
 
-class stopInfo:
+class StopInfo:
     def __init__(self, api_key, bus_line, stop_id, direction):
         self.api_key = api_key
         self.bus_line = 'MTA NYCT_{}'.format(bus_line)
@@ -101,7 +101,7 @@ def main():
     parser.add_argument('-f', '--format', type=str, default='%l [%r]\t%s stops away\t%M minutes away',help='Format for printing out the data. Supports following substitutions:\n    %%l - the line\n    %%r - the route\n    %%s - # of stops away\n    %%H - # of hours away\n    %%M - # of minutes away\n    %%S - # of seconds away\n    %%T - deltatime-native time output')
     args = parser.parse_args()
 
-    stop = stopInfo(args.api_key,args.bus_line,args.stop_id,args.direction)
+    stop = StopInfo(args.api_key,args.bus_line,args.stop_id,args.direction)
     stop.printf(args.format)
 
 if __name__ == '__main__':
